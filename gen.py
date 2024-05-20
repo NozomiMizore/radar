@@ -24,13 +24,22 @@ def generate_random_radar_data(num_radars, lon_range, lat_range, elev_range, r_r
             r = random.randint(*r_range)
             writer.writerow([x, y, z, r])
 
-# 参数配置
-num_radars = 256  # 生成256个雷达数据
-lon_range = (109.99958381761098, 114.99958381761098)  # 经度范围
-lat_range = (25.000417247801863, 30.000417247801863)  # 纬度范围
-elev_range = (-26, 2124)  # 高程范围
-r_range = (1, 50)  # 探测半径范围，1千米到50千米
-output_file = './data/radar_data.csv'  # 输出文件名
+if __name__ == "__main__":
+    # 参数配置
+    # num_radars = 128  # 生成128个雷达数据
+    # lon_range = (109.99958381761098, 114.99958381761098)  # 经度范围
+    # lat_range = (25.000417247801863, 30.000417247801863)  # 纬度范围
+    # elev_range = (-26, 2124)  # 高程范围
+    # r_range = (5, 20)  # 探测半径范围，5千米到20千米
+    # output_file = './data/radar_data.csv'  # 输出文件名
 
-# 生成并写入数据
-generate_random_radar_data(num_radars, lon_range, lat_range, elev_range, r_range, output_file)
+    # 08.tif
+    num_radars = 64  # 生成64个雷达数据
+    lon_range = (109.99958381761098, 114.99958381761098)  # 经度范围
+    lat_range = (20.00041712672993, 25.00041712672993)  # 纬度范围
+    elev_range = (100, 500)  # 高程范围
+    r_range = (1, 10)  # 探测半径范围，5千米到20千米
+    output_file = './data/radar_data.csv'  # 输出文件名
+
+    # 生成并写入数据
+    generate_random_radar_data(num_radars, lon_range, lat_range, elev_range, r_range, output_file)

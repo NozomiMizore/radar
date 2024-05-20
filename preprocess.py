@@ -18,15 +18,15 @@ def read_tif(path_tif, tif_file):
     x, y = np.meshgrid(x_range, y_range)
     lon = im_geotrans[0] + x * im_geotrans[1] + y * im_geotrans[2]
     lat = im_geotrans[3] + x * im_geotrans[4] + y * im_geotrans[5]
-    
+    lon = lon[0]
+    lat = lat[:,0]
     return lon, lat, data
 
 
 if __name__ == "__main__":
 
-    # 示例
-    lon, lat, elevation = read_tif('./data/', '59_07.tif')
-
+    # lon, lat, elevation = read_tif('./data/', '59_07.tif')
+    lon, lat, elevation = read_tif('./data/', '59_08.tif')
     # 保存数据以供C程序读取
     np.savetxt('./data/lon.csv', lon, delimiter=',')
     np.savetxt('./data/lat.csv', lat, delimiter=',')

@@ -26,7 +26,7 @@ def preproceess_read_tif(path_tif,tif_file):
 if __name__ == "__main__":
     path_out = './data/'
     # tif_file = '59_08.tif'
-    tif_file = '59_07.tif'
+    tif_file = '59_08.tif'
     lon, lat, elevation = preproceess_read_tif(path_out,tif_file)
     
     # 计算经度、纬度和高程的最大值和最小值
