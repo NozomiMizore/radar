@@ -1,6 +1,6 @@
 from osgeo import gdal
 import numpy as np
-import csv
+
 
 def read_tif(path_tif, tif_file):
     dataset = gdal.Open(path_tif + tif_file)
@@ -21,14 +21,6 @@ def read_tif(path_tif, tif_file):
     
     return lon, lat, data
 
-def read_radar_data(radar_file):
-    radar_data = []
-    with open(radar_file, 'r') as file:
-        reader = csv.reader(file)
-        for row in reader:
-            x, y, z, r = map(float, row)
-            radar_data.append((x, y, z, r))
-    return radar_data
 
 if __name__ == "__main__":
 
