@@ -34,7 +34,7 @@ if __name__ == "__main__":
     # output_file = './data/radar_data.csv'  # 输出文件名
 
     # 08.tif
-    num_radars = 64  # 生成64个雷达数据
+    num_radars = 4  # 生成64个雷达数据
     lon_range = (109.99958381761098, 114.99958381761098)  # 经度范围
     lat_range = (20.00041712672993, 25.00041712672993)  # 纬度范围
     elev_range = (100, 500)  # 高程范围
