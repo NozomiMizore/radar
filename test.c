@@ -7,7 +7,7 @@
 
 #define R 6371e3  // 地球半径，单位：米
 #define DEG2RAD(deg) ((deg) * M_PI / 180.0)
-
+#define LINE_SIZE 65535*4
 typedef struct {
     double x;  // 经度
     double y;  // 纬度
@@ -39,7 +39,7 @@ void read_ele_data(const char* filename, double*** data, int width, int height) 
         exit(EXIT_FAILURE);
     }
 
-    *data = (double**)malloc(width * sizeof(double*));
+    *data = (double**)malloc(height * sizeof(double*));
     if (!(*data)) {
         fprintf(stderr, "Memory allocation failed\n");
         fclose(file);
@@ -47,7 +47,7 @@ void read_ele_data(const char* filename, double*** data, int width, int height) 
     }
 
     for (int i = 0; i < width; i++) {
-        (*data)[i] = (double*)malloc(height * sizeof(double));
+        (*data)[i] = (double*)malloc(width * sizeof(double));
         if (!(*data)[i]) {
             fprintf(stderr, "Memory allocation failed\n");
             fclose(file);
@@ -55,18 +55,19 @@ void read_ele_data(const char* filename, double*** data, int width, int height) 
         }
     }
 
-    char line[256];
+    char line[LINE_SIZE];
     int i = 0;
     int j = 0;
-    while (fgets(line, sizeof(line), file) && i < width) {
-        (*data)[i][j] = atof(line);
-        j++;
-        if (j == height) {
-            j = 0;
-            i++;
+    while (fgets(line, sizeof(line), file) && i < height) {
+        char* token = strtok(line, ",");
+        while(token != NULL && j < width){
+            (*data)[i][j] = atof(token);
+            token = strtok(NULL, ",");
+            j++;
         }
+        i++;
+        j = 0;
     }
-
     fclose(file);
 }
 

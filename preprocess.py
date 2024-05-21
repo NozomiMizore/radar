@@ -10,7 +10,7 @@ def read_tif(path_tif, tif_file):
 
     if im_bands == 1:
         band = dataset.GetRasterBand(1)
-        data = band.ReadAsArray()
+        elevation = band.ReadAsArray()
     
     im_geotrans = dataset.GetGeoTransform()
     x_range = range(0, im_width)
@@ -20,7 +20,7 @@ def read_tif(path_tif, tif_file):
     lat = im_geotrans[3] + x * im_geotrans[4] + y * im_geotrans[5]
     lon = lon[0]
     lat = lat[:,0]
-    return lon, lat, data
+    return lon, lat, elevation
 
 
 if __name__ == "__main__":
@@ -30,4 +30,4 @@ if __name__ == "__main__":
     # 保存数据以供C程序读取
     np.savetxt('./data/lon.csv', lon, delimiter=',')
     np.savetxt('./data/lat.csv', lat, delimiter=',')
-    np.savetxt('./data/elevation.csv', elevation, delimiter=',')
+    np.savetxt('./data/elevation.csv', elevation.astype(int), delimiter=',')

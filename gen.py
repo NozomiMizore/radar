@@ -34,11 +34,11 @@ if __name__ == "__main__":
     # output_file = './data/radar_data.csv'  # 输出文件名
 
     # 08.tif
-    num_radars = 4  # 生成64个雷达数据
+    num_radars = 8  # 生成8个雷达数据
     lon_range = (109.99958381761098, 114.99958381761098)  # 经度范围
     lat_range = (20.00041712672993, 25.00041712672993)  # 纬度范围
     elev_range = (100, 500)  # 高程范围
-    r_range = (1, 10)  # 探测半径范围，5千米到20千米
+    r_range = (1, 10)  # 探测半径范围，1千米到10千米
     output_file = './data/radar_data.csv'  # 输出文件名
 
     # 生成并写入数据
