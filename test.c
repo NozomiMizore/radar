@@ -216,11 +216,11 @@ int main() {
     Radar* radars;
     read_radar_data("./data/radar_data_07.csv", &radars, &num_radars);
 
-    time_t start, end;
-    start = time(NULL);
+    clock_t start,end;
+    start = clock();
     calculate_radar_coverage(radars, num_radars, lons, lats, elevs, width, height, interval, num_samples);
-    end = time(NULL);
-    printf("time=%lf\n",difftime(end,start));
+    end = clock();
+    printf("time=%.3fs\n",(double)(end-start)/CLOCKS_PER_SEC);
     
     free(lons);
     free(lats);
