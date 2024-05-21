@@ -25,9 +25,9 @@ def read_tif(path_tif, tif_file):
 
 if __name__ == "__main__":
 
-    # lon, lat, elevation = read_tif('./data/', '59_07.tif')
-    lon, lat, elevation = read_tif('./data/', '59_08.tif')
+    # lon, lat, elevation = read_tif('./data/', '59_08.tif')
+    lon, lat, elevation = read_tif('./data/', '59_07.tif')
     # 保存数据以供C程序读取
-    np.savetxt('./data/lon.csv', lon, delimiter=',')
-    np.savetxt('./data/lat.csv', lat, delimiter=',')
-    np.savetxt('./data/elevation.csv', elevation.astype(int), delimiter=',')
+    np.savetxt('./data/lon_07.csv', lon, delimiter=',')
+    np.savetxt('./data/lat_07.csv', lat, delimiter=',')
+    np.savetxt('./data/elevation_07.csv', elevation.astype(int), delimiter=',')

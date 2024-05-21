@@ -145,7 +145,7 @@ int is_blocked(double rx, double ry, double rz, int t_x_index, int t_y_index, do
 }
 
 void calculate_radar_coverage(Radar* radars, int num_radars, double* lons, double* lats, double** elevs, int width, int height, double interval, int num_samples) {
-    FILE* output_file = fopen("res/result.csv", "w");
+    FILE* output_file = fopen("res/result_07.csv", "w");
     if (!output_file) {
         fprintf(stderr, "result.csv for writing\n");
         exit(EXIT_FAILURE);
@@ -207,14 +207,14 @@ int main() {
     double* lats = (double*)malloc(height * sizeof(double));
     double** elevs;
 
-    read_csv_data("./data/lon.csv", lons, width);
-    read_csv_data("./data/lat.csv", lats, height);
-    read_ele_data("./data/elevation.csv", &elevs, width, height);
+    read_csv_data("./data/lon_07.csv", lons, width);
+    read_csv_data("./data/lat_07.csv", lats, height);
+    read_ele_data("./data/elevation_07.csv", &elevs, width, height);
     double interval = fabs(lons[1] - lons[0]);
     
     int num_radars;
     Radar* radars;
-    read_radar_data("./data/radar_data.csv", &radars, &num_radars);
+    read_radar_data("./data/radar_data_07.csv", &radars, &num_radars);
 
     time_t start, end;
     start = time(NULL);
