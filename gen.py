@@ -46,7 +46,7 @@ def generate_random_radar_data(num_radars, lon_range, lat_range, elev_range, r_r
         for _ in range(num_radars):
             x = random.uniform(*lon_range)
             y = random.uniform(*lat_range)
-            z = random.uniform(elev_range[0] - 100, elev_range[1] + 100)  # 比高程范围大一点
+            z = random.uniform(elev_range[0] , elev_range[1])  # 比高程范围大一点
             r = random.randint(*r_range)
             writer.writerow([x, y, z, r])
 
@@ -54,7 +54,7 @@ def generate_random_radar_data(num_radars, lon_range, lat_range, elev_range, r_r
 if __name__ == "__main__":
     path_out = './data/'
     # tif_file = '59_08.tif'
-    tif_file = '59_08.tif'
+    tif_file = '59_07.tif'
     lon, lat, elevation = read_tif(path_out,tif_file)
     
     # 计算经度、纬度和高程的最大值和最小值
@@ -70,8 +70,8 @@ if __name__ == "__main__":
     num_radars = 8
     lon_range = (lon_min, lon_max)
     lat_range = (lat_min, lat_max)
-    elev_range = (0, elevation_max/2)
+    elev_range = (0, elevation_max/8)
     r_range = (1, 10)  # 探测半径范围为 1 到 10 千米
-    output_file = './data/radar_data.csv'
+    output_file = './data/radar_data_07.csv'
     
     generate_random_radar_data(num_radars, lon_range, lat_range, elev_range, r_range, output_file)

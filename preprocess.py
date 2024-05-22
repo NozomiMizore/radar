@@ -11,7 +11,7 @@ def read_tif(path_tif, tif_file):
     if im_bands == 1:
         band = dataset.GetRasterBand(1)
         elevation = band.ReadAsArray()
-    
+        elevation[elevation < -10000] = 0
     im_geotrans = dataset.GetGeoTransform()
     x_range = range(0, im_width)
     y_range = range(0, im_height)
