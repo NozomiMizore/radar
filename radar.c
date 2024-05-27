@@ -184,10 +184,6 @@ void calculate_radar_coverage(Radar* radars, int num_radars, double* lons, doubl
             fprintf(stderr, "Could not open file %s for writing\n", filename);
             exit(EXIT_FAILURE);
         }
-        // double min_lon = radars[i].x - radars[i].r * 0.0091;
-        // double max_lon = radars[i].x + radars[i].r * 0.0091;
-        // double min_lat = radars[i].y - radars[i].r * 0.01;
-        // double max_lat = radars[i].y + radars[i].r * 0.01;
         double min_lon = 0.0;
         double max_lon = 360.0;
         double min_lat = 0.0;
