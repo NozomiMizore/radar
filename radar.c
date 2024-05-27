@@ -7,6 +7,7 @@
 
 #define R 6371e3  // 地球半径，单位：米
 #define DEG2RAD(deg) ((deg) * M_PI / 180.0)
+#define RAD2DEG(rad) ((rad) * 180.0 / M_PI)
 #define LINE_SIZE 65535*4
 typedef struct {
     double x;  // 经度
@@ -119,13 +120,42 @@ double haversine(double lon1, double lat1, double lon2, double lat2) {
     return distance;
 }
 
+void calculate_lat_lon(double lon1, double lat1, int r, double* min_lon, double* max_lon, double* min_lat, double* max_lat) {
+    double delta_lat = ((double)r * 1000 / R) * RAD2DEG(1.0);
+    *min_lat = lat1 - delta_lat;
+    *max_lat = lat1 + delta_lat;
+
+    double delta_lon = ((double)r * 1000 / (R * cos(DEG2RAD(lat1)))) * RAD2DEG(1.0);
+    *min_lon = lon1 - delta_lon;
+    *max_lon = lon1 + delta_lon;
+
+    // printf("Point 1: (%lf, %lf)\n", lon1, lat1);
+    // printf("Min Latitude: %lf\n", *min_lat);
+    // printf("Max Latitude: %lf\n", *max_lat);
+    // printf("Min Longitude: %lf\n", *min_lon);
+    // printf("Max Longitude: %lf\n", *max_lon);
+
+    // // 验证计算结果
+    // double dist_min_lat = haversine(lon1, lat1, lon1, *min_lat);
+    // double dist_max_lat = haversine(lon1, lat1, lon1, *max_lat);
+    // double dist_min_lon = haversine(lon1, lat1, *min_lon, lat1);
+    // double dist_max_lon = haversine(lon1, lat1, *max_lon, lat1);
+
+    // printf("Distance to Min Latitude: %lf m\n", dist_min_lat);
+    // printf("Distance to Max Latitude: %lf m\n", dist_max_lat);
+    // printf("Distance to Min Longitude: %lf m\n", dist_min_lon);
+    // printf("Distance to Max Longitude: %lf m\n", dist_max_lon);
+}
+
 int is_blocked(double rx, double ry, double rz, int t_x_index, int t_y_index, double* lons, double* lats, double** elevs, double interval, int width, int height, int num_samples) {
-    double t_z = elevs[t_x_index][t_y_index];
+    double t_z = elevs[t_y_index][t_x_index];
     double t_x = lons[t_x_index];
     double t_y = lats[t_y_index];
     int flag_x = 0;
     int flag_y = 0;
-    if(fabs(t_x - rx) < 2*interval && fabs(t_y - ry) < 2*interval)
+    // if(fabs(t_x - rx) < 2*interval && fabs(t_y - ry) < 2*interval)
+    //     return 0;
+    if(fabs(t_x - rx) < interval && fabs(t_y - ry) < interval)
         return 0;
     
     for(int i = 0; i  <= num_samples; i++){
@@ -137,7 +167,7 @@ int is_blocked(double rx, double ry, double rz, int t_x_index, int t_y_index, do
         int lon_index = (int)((lon - lons[0]) / interval);
         int lat_index = (int)((lats[0] - lat) / interval);
 
-        if(elevs[lon_index][lat_index] > ele){
+        if(elevs[lat_index][lon_index] > ele){
             return 1;
         }
     }
@@ -145,18 +175,26 @@ int is_blocked(double rx, double ry, double rz, int t_x_index, int t_y_index, do
 }
 
 void calculate_radar_coverage(Radar* radars, int num_radars, double* lons, double* lats, double** elevs, int width, int height, double interval, int num_samples) {
-    FILE* output_file = fopen("res/result_07.csv", "w");
-    if (!output_file) {
-        fprintf(stderr, "result.csv for writing\n");
-        exit(EXIT_FAILURE);
-    }
-
-    #pragma omp parallel for num_threads(4)
+    // #pragma omp parallel for num_threads(4)
     for (int i = 0; i < num_radars; i++) {
-        double min_lon = radars[i].x - radars[i].r * 0.0091;
-        double max_lon = radars[i].x + radars[i].r * 0.0091;
-        double min_lat = radars[i].y - radars[i].r * 0.01;
-        double max_lat = radars[i].y + radars[i].r * 0.01;
+        char filename[256];
+        snprintf(filename, sizeof(filename), "res/result_radar_%d.csv", i);
+        FILE* output_file = fopen(filename, "w");
+        if (!output_file) {
+            fprintf(stderr, "Could not open file %s for writing\n", filename);
+            exit(EXIT_FAILURE);
+        }
+        // double min_lon = radars[i].x - radars[i].r * 0.0091;
+        // double max_lon = radars[i].x + radars[i].r * 0.0091;
+        // double min_lat = radars[i].y - radars[i].r * 0.01;
+        // double max_lat = radars[i].y + radars[i].r * 0.01;
+        double min_lon = 0.0;
+        double max_lon = 360.0;
+        double min_lat = 0.0;
+        double max_lat = 360.0;
+
+        calculate_lat_lon(radars[i].x, radars[i].y, radars[i].r, &min_lon, &max_lon, &min_lat, &max_lat);
+
         int min_lon_index = 0;
         int max_lon_index = width-1;
         int min_lat_index = 0;
@@ -177,26 +215,36 @@ void calculate_radar_coverage(Radar* radars, int num_radars, double* lons, doubl
             if(lats[max_lat_index] >= min_lat)
                 break;
         }
-        for(int j = min_lon_index; j <= max_lon_index; j++){
-            for(int k = min_lat_index; k <= max_lat_index; k++){
+        if(i == 3){
+            printf("%d\t%d\t%d\t%d\n", min_lon_index, max_lon_index, min_lat_index, max_lat_index);
+            printf("%lf\t%lf\t%lf\t%lf\n", lons[min_lon_index-1], lons[max_lon_index], lats[min_lat_index], lats[max_lat_index]);
+            printf("%lf\t%lf\t%lf\t%d\n", radars[i].x, radars[i].y, radars[i].z, radars[i].r);
+        }
+        int count = 0;
+        for(int j = min_lat_index; j <= max_lat_index; j++){
+            for(int k = min_lon_index; k <= max_lon_index; k++){
                 double vertical_distance = fabs(radars[i].z - elevs[j][k]);
-                if(vertical_distance > radars[i].r * 1000)
+                if(vertical_distance > radars[i].r * 1000){
                     continue;
-                double horizontal_distance = haversine(radars[i].x, radars[i].y, lons[j], lats[k]);
+                }
+                if(i == 3){
+                    count++;
+                }
+                double horizontal_distance = haversine(radars[i].x, radars[i].y, lons[k], lats[j]);
                 double distance = sqrt(horizontal_distance * horizontal_distance + vertical_distance * vertical_distance);
                 if (distance <= radars[i].r * 1000) {  // 距离在探测半径内
-                    if (!is_blocked(radars[i].x, radars[i].y, radars[i].z, j, k, lons, lats, elevs, interval, width, height, num_samples)) {
-                        #pragma omp critical
-                        {
-                            fprintf(output_file, "Radar %d can detect point at (%lf, %lf, %lf)\n", i, lons[j], lats[k], elevs[j][k]);
-                        }
+                    if (!is_blocked(radars[i].x, radars[i].y, radars[i].z, k, j, lons, lats, elevs, interval, width, height, num_samples)) {
+                        fprintf(output_file, "%lf, %lf, %lf\n", lons[k], lats[j], elevs[j][k]);  
                     }
                 }
             }
         }
+        if(i == 3){
+            printf("%d\n", count);
+        }
+        fclose(output_file);
     }
 
-    fclose(output_file);
 }
 
 int main() {
@@ -207,14 +255,14 @@ int main() {
     double* lats = (double*)malloc(height * sizeof(double));
     double** elevs;
 
-    read_csv_data("./data/lon_07.csv", lons, width);
-    read_csv_data("./data/lat_07.csv", lats, height);
-    read_ele_data("./data/elevation_07.csv", &elevs, width, height);
+    read_csv_data("./data/lon_08.csv", lons, width);
+    read_csv_data("./data/lat_08.csv", lats, height);
+    read_ele_data("./data/elevation_08.csv", &elevs, width, height);
     double interval = fabs(lons[1] - lons[0]);
     
     int num_radars;
     Radar* radars;
-    read_radar_data("./data/radar_data_07.csv", &radars, &num_radars);
+    read_radar_data("./data/radar_data_08.csv", &radars, &num_radars);
 
     clock_t start,end;
     start = clock();
