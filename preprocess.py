@@ -1,7 +1,6 @@
 from osgeo import gdal
 import numpy as np
 
-
 def read_tif(path_tif, tif_file):
     dataset = gdal.Open(path_tif + tif_file)
     im_width = dataset.RasterXSize
@@ -21,7 +20,6 @@ def read_tif(path_tif, tif_file):
     lon = lon[0]
     lat = lat[:,0]
     return lon, lat, elevation
-
 
 if __name__ == "__main__":
 

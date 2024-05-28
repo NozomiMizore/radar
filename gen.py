@@ -28,16 +28,7 @@ def read_tif(path_tif,tif_file):
 
 
 def generate_random_radar_data(num_radars, lon_range, lat_range, elev_range, r_range, output_file):
-    """
-    随机生成雷达数据并写入CSV文件
 
-    :param num_radars: 生成的雷达数量
-    :param lon_range: 经度的范围 (min_lon, max_lon)
-    :param lat_range: 纬度的范围 (min_lat, max_lat)
-    :param elev_range: 高程的范围 (min_elev, max_elev)
-    :param r_range: 探测半径的范围 (min_r, max_r)
-    :param output_file: 输出的 CSV 文件名
-    """
     with open(output_file, 'w', newline='') as file:
         writer = csv.writer(file)
         # 写入表头
@@ -46,7 +37,7 @@ def generate_random_radar_data(num_radars, lon_range, lat_range, elev_range, r_r
         for _ in range(num_radars):
             x = random.uniform(*lon_range)
             y = random.uniform(*lat_range)
-            z = random.uniform(elev_range[0] , elev_range[1])  # 比高程范围大一点
+            z = random.uniform(elev_range[0] , elev_range[1])
             r = random.randint(*r_range)
             writer.writerow([x, y, z, r])
 

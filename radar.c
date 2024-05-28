@@ -16,6 +16,7 @@ typedef struct {
     int r;     // 探测半径（千米）
 } Radar;
 
+// 从csv文件中读取经纬度数据
 void read_csv_data(const char* filename, double* data, int size) {
     FILE* file = fopen(filename, "r");
     if (!file) {
@@ -33,6 +34,7 @@ void read_csv_data(const char* filename, double* data, int size) {
     fclose(file);
 }
 
+// 从csv文件中读取所有地形点的高程值数据
 void read_ele_data(const char* filename, double*** data, int width, int height) {
     FILE* file = fopen(filename, "r");
     if (!file) {
@@ -72,6 +74,7 @@ void read_ele_data(const char* filename, double*** data, int width, int height) 
     fclose(file);
 }
 
+// 读取雷达参数
 void read_radar_data(const char* filename, Radar** radars, int* num_radars) {
     FILE* file = fopen(filename, "r");
     if (!file) {
@@ -106,6 +109,7 @@ void read_radar_data(const char* filename, Radar** radars, int* num_radars) {
     fclose(file);
 }
 
+// haversine公式计算水平距离
 double haversine(double lon1, double lat1, double lon2, double lat2) {
     double phi1 = DEG2RAD(lat1);
     double phi2 = DEG2RAD(lat2);
@@ -120,6 +124,7 @@ double haversine(double lon1, double lat1, double lon2, double lat2) {
     return distance;
 }
 
+// 给定雷达经纬度和探测半径，根据公式计算最小和最大经纬度
 void calculate_lat_lon(double lon1, double lat1, int r, double* min_lon, double* max_lon, double* min_lat, double* max_lat) {
     double delta_lat = ((double)r * 1000 / R) * RAD2DEG(1.0);
     *min_lat = lat1 - delta_lat;
@@ -128,33 +133,15 @@ void calculate_lat_lon(double lon1, double lat1, int r, double* min_lon, double*
     double delta_lon = ((double)r * 1000 / (R * cos(DEG2RAD(lat1)))) * RAD2DEG(1.0);
     *min_lon = lon1 - delta_lon;
     *max_lon = lon1 + delta_lon;
-
-    // printf("Point 1: (%lf, %lf)\n", lon1, lat1);
-    // printf("Min Latitude: %lf\n", *min_lat);
-    // printf("Max Latitude: %lf\n", *max_lat);
-    // printf("Min Longitude: %lf\n", *min_lon);
-    // printf("Max Longitude: %lf\n", *max_lon);
-
-    // // 验证计算结果
-    // double dist_min_lat = haversine(lon1, lat1, lon1, *min_lat);
-    // double dist_max_lat = haversine(lon1, lat1, lon1, *max_lat);
-    // double dist_min_lon = haversine(lon1, lat1, *min_lon, lat1);
-    // double dist_max_lon = haversine(lon1, lat1, *max_lon, lat1);
-
-    // printf("Distance to Min Latitude: %lf m\n", dist_min_lat);
-    // printf("Distance to Max Latitude: %lf m\n", dist_max_lat);
-    // printf("Distance to Min Longitude: %lf m\n", dist_min_lon);
-    // printf("Distance to Max Longitude: %lf m\n", dist_max_lon);
 }
 
+// 给定雷达参数和目标地形点数据，判断是否被阻挡
 int is_blocked(double rx, double ry, double rz, int t_x_index, int t_y_index, double* lons, double* lats, double** elevs, double interval, int width, int height, int num_samples) {
     double t_z = elevs[t_y_index][t_x_index];
     double t_x = lons[t_x_index];
     double t_y = lats[t_y_index];
     int flag_x = 0;
     int flag_y = 0;
-    // if(fabs(t_x - rx) < 2*interval && fabs(t_y - ry) < 2*interval)
-    //     return 0;
     if(fabs(t_x - rx) <= interval && fabs(t_y - ry) <= interval)
         return 0;
     
@@ -174,6 +161,7 @@ int is_blocked(double rx, double ry, double rz, int t_x_index, int t_y_index, do
     return 0;  // 没有阻挡
 }
 
+// 并行计算雷达通视范围
 void calculate_radar_coverage(Radar* radars, int num_radars, double* lons, double* lats, double** elevs, int width, int height, double interval, int num_samples, int tif_order) {
     #pragma omp parallel for num_threads(4)
     for (int i = 0; i < num_radars; i++) {
@@ -211,11 +199,6 @@ void calculate_radar_coverage(Radar* radars, int num_radars, double* lons, doubl
             if(lats[max_lat_index] >= min_lat)
                 break;
         }
-        // if(i == 3){
-        //     printf("%d\t%d\t%d\t%d\n", min_lon_index, max_lon_index, min_lat_index, max_lat_index);
-        //     printf("%lf\t%lf\t%lf\t%lf\n", lons[min_lon_index-1], lons[max_lon_index], lats[min_lat_index], lats[max_lat_index]);
-        //     printf("%lf\t%lf\t%lf\t%d\n", radars[i].x, radars[i].y, radars[i].z, radars[i].r);
-        // }
         for(int j = min_lat_index; j <= max_lat_index; j++){
             for(int k = min_lon_index; k <= max_lon_index; k++){
                 double vertical_distance = fabs(radars[i].z - elevs[j][k]);
