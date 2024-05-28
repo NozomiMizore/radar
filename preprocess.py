@@ -33,5 +33,6 @@ if __name__ == "__main__":
     np.savetxt('./data/lon.csv', lon, delimiter=',')
     np.savetxt('./data/lat.csv', lat, delimiter=',')
     np.savetxt('./data/elevation.csv', elevation.astype(int), delimiter=',')
+    # print(elevation[4519][5282])
 
 
