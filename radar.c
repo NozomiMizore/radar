@@ -49,7 +49,7 @@ void read_ele_data(const char* filename, double*** data, int width, int height) 
         exit(EXIT_FAILURE);
     }
 
-    for (int i = 0; i < width; i++) {
+    for (int i = 0; i < height; i++) {
         (*data)[i] = (double*)malloc(width * sizeof(double));
         if (!(*data)[i]) {
             fprintf(stderr, "Memory allocation failed\n");
@@ -89,7 +89,6 @@ void read_radar_data(const char* filename, Radar** radars, int* num_radars) {
     }
     rewind(file);
 
-    // Skip header
     fgets(line, sizeof(line), file);
 
     *num_radars = count - 1;
@@ -162,11 +161,11 @@ int is_blocked(double rx, double ry, double rz, int t_x_index, int t_y_index, do
 }
 
 // 并行计算雷达通视范围
-void calculate_radar_coverage(Radar* radars, int num_radars, double* lons, double* lats, double** elevs, int width, int height, double interval, int num_samples, int tif_order) {
+void calculate_radar_coverage(Radar* radars, int num_radars, double* lons, double* lats, double** elevs, int width, int height, double interval, int num_samples) {
     #pragma omp parallel for num_threads(4)
     for (int i = 0; i < num_radars; i++) {
         char filename[256];
-        snprintf(filename, sizeof(filename), "res/0%d_result_radar_%d.csv", tif_order, i);
+        snprintf(filename, sizeof(filename), "res/result_radar_%d.csv", i);
         FILE* output_file = fopen(filename, "w");
         if (!output_file) {
             fprintf(stderr, "Could not open file %s for writing\n", filename);
@@ -221,42 +220,29 @@ void calculate_radar_coverage(Radar* radars, int num_radars, double* lons, doubl
 
 int main() {
     int width = 6001;
-    int height = 6001;
+    int height = 12002;
     int num_samples = 100;
     double* lons = (double*)malloc(width * sizeof(double));
     double* lats = (double*)malloc(height * sizeof(double));
     double** elevs;
-    int tif_order = 0;
-    printf("请输入要使用的地形数据文件序号(7或8):");
-    scanf("%d", &tif_order);
-    if(tif_order == 7){
-        read_csv_data("./data/lon_07.csv", lons, width);
-        read_csv_data("./data/lat_07.csv", lats, height);
-        read_ele_data("./data/elevation_07.csv", &elevs, width, height);
-    }else if (tif_order == 8){
-        read_csv_data("./data/lon_08.csv", lons, width);
-        read_csv_data("./data/lat_08.csv", lats, height);
-        read_ele_data("./data/elevation_08.csv", &elevs, width, height);
-    }
+    read_csv_data("./data/lon.csv", lons, width);
+    read_csv_data("./data/lat.csv", lats, height);
+    read_ele_data("./data/elevation.csv", &elevs, width, height);
     double interval = fabs(lons[1] - lons[0]);
     
     int num_radars;
     Radar* radars;
-    if(tif_order == 7){
-        read_radar_data("./data/radar_data_07.csv", &radars, &num_radars);
-    }else if (tif_order == 8){
-        read_radar_data("./data/radar_data_08.csv", &radars, &num_radars);
-    }
+    read_radar_data("./data/radar_data.csv", &radars, &num_radars);
 
     clock_t start,end;
     start = clock();
-    calculate_radar_coverage(radars, num_radars, lons, lats, elevs, width, height, interval, num_samples, tif_order);
+    calculate_radar_coverage(radars, num_radars, lons, lats, elevs, width, height, interval, num_samples);
     end = clock();
     printf("time=%.3fs\n",(double)(end-start)/CLOCKS_PER_SEC);
     
     free(lons);
     free(lats);
-    for (int i = 0; i < width; i++) {
+    for (int i = 0; i < height; i++) {
         free(elevs[i]);
     }
     free(elevs);

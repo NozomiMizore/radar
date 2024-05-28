@@ -23,13 +23,15 @@ def read_tif(path_tif, tif_file):
 
 if __name__ == "__main__":
 
-    lon, lat, elevation = read_tif('./data/', '59_08.tif')
-    # lon, lat, elevation = read_tif('./data/', '59_07.tif')
+    lon, lat_1, elevation_1 = read_tif('./data/', '59_07.tif')
+    _, lat_2, elevation_2 = read_tif('./data/', '59_08.tif')
+    lat = np.concatenate((lat_1, lat_2), axis=0)
+    elevation = np.vstack((elevation_1, elevation_2))
+    print(len(lat))
+    print(elevation.shape)
     # 保存数据以供C程序读取
-    np.savetxt('./data/lon_08.csv', lon, delimiter=',')
-    np.savetxt('./data/lat_08.csv', lat, delimiter=',')
-    np.savetxt('./data/elevation_08.csv', elevation.astype(int), delimiter=',')
-    # for i in range (2729, 2733):
-    #     for j in range (1477, 1481):
-    #         print(elevation[i][j])
+    np.savetxt('./data/lon.csv', lon, delimiter=',')
+    np.savetxt('./data/lat.csv', lat, delimiter=',')
+    np.savetxt('./data/elevation.csv', elevation.astype(int), delimiter=',')
+
 
