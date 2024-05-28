@@ -155,7 +155,7 @@ int is_blocked(double rx, double ry, double rz, int t_x_index, int t_y_index, do
     int flag_y = 0;
     // if(fabs(t_x - rx) < 2*interval && fabs(t_y - ry) < 2*interval)
     //     return 0;
-    if(fabs(t_x - rx) < interval && fabs(t_y - ry) < interval)
+    if(fabs(t_x - rx) <= interval && fabs(t_y - ry) <= interval)
         return 0;
     
     for(int i = 0; i  <= num_samples; i++){
